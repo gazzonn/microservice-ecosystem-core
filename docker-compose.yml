@@ -1,0 +1,107 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: ecosystem_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: ecosystem_redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth_service:
+    build:
+      context: .
+      dockerfile: auth_service/Dockerfile
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+
+  authorization_service:
+    build:
+      context: .
+      dockerfile: authorization_service/Dockerfile
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8002:8002"
+
+  user_service:
+    build:
+      context: .
+      dockerfile: user_service/Dockerfile
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8003:8003"
+
+  service_registry:
+    build:
+      context: .
+      dockerfile: service_registry/Dockerfile
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8004:8004"
+
+  demo_microservice:
+    build:
+      context: .
+      dockerfile: demo_microservice/Dockerfile
+    env_file: .env
+    depends_on:
+      service_registry:
+        condition: service_started
+    ports:
+      - "8005:8005"
+
+  api_gateway:
+    build:
+      context: .
+      dockerfile: api_gateway/Dockerfile
+    env_file: .env
+    depends_on:
+      auth_service:
+        condition: service_started
+      authorization_service:
+        condition: service_started
+      service_registry:
+        condition: service_started
+      demo_microservice:
+        condition: service_started
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
