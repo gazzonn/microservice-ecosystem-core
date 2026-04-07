@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from auth_service.app.models.user import User  # noqa: F401
-from authorization_service.app.models import Permission, Role, RolePermission, UserRole  # noqa: F401
+from authorization_service.app.models import Permission, Role, RolePermission, UserReference, UserRole  # noqa: F401
 from authorization_service.app.routes.authorization import router as authorization_router
 from shared.database.base import Base
 from shared.database.session import engine
