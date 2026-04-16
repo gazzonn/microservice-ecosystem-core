@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     authorization_service_url: str = Field(default="http://localhost:8002", alias="AUTHORIZATION_SERVICE_URL")
     user_service_url: str = Field(default="http://localhost:8003", alias="USER_SERVICE_URL")
     service_registry_url: str = Field(default="http://localhost:8004", alias="SERVICE_REGISTRY_URL")
+    api_gateway_url: str = Field(default="http://localhost:8000", alias="API_GATEWAY_URL")
     demo_service_url: str = Field(default="http://localhost:8005", alias="DEMO_SERVICE_URL")
     rate_limit_requests: int = Field(default=60, alias="RATE_LIMIT_REQUESTS")
     rate_limit_window_seconds: int = Field(default=60, alias="RATE_LIMIT_WINDOW_SECONDS")

@@ -7,7 +7,7 @@ from authorization_service.app.schemas.authorization import (
     PermissionCreateRequest,
     RoleCreateRequest,
 )
-from shared.exceptions.api import NotFoundException
+from shared.exceptions.api import AppException, NotFoundException
 
 
 class AuthorizationService:
@@ -17,19 +17,31 @@ class AuthorizationService:
         self.repository = repository
 
     def create_role(self, data: RoleCreateRequest) -> Role:
+        existing_role = self.repository.get_role_by_name(data.name)
+        if existing_role:
+            return existing_role
         return self.repository.create_role(Role(name=data.name, description=data.description))
 
     def create_permission(self, data: PermissionCreateRequest) -> Permission:
+        existing_permission = self.repository.get_permission_by_signature(data.resource, data.action)
+        if existing_permission:
+            return existing_permission
         return self.repository.create_permission(
             Permission(name=data.name, resource=data.resource, action=data.action, description=data.description)
         )
 
     def assign_role(self, user_id: str, role_id: str) -> None:
+        if not role_id:
+            raise AppException("Role ID is required", "AUTHZ_400", 400)
         if not self.repository.get_role(role_id):
             raise NotFoundException("Role not found")
         self.repository.assign_role(user_id, role_id)
 
     def assign_permission(self, role_id: str, permission_id: str) -> None:
+        if not role_id:
+            raise AppException("Role ID is required", "AUTHZ_400", 400)
+        if not permission_id:
+            raise AppException("Permission ID is required", "AUTHZ_400", 400)
         if not self.repository.get_role(role_id):
             raise NotFoundException("Role not found")
         if not self.repository.get_permission(permission_id):

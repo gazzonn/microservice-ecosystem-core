@@ -25,8 +25,20 @@ class AuthorizationRepository:
     def get_role(self, role_id: str) -> Role | None:
         return self.session.get(Role, role_id)
 
+    def get_role_by_name(self, name: str) -> Role | None:
+        stmt = select(Role).where(Role.name == name).order_by(Role.id.asc())
+        return self.session.execute(stmt).scalars().first()
+
     def get_permission(self, permission_id: str) -> Permission | None:
         return self.session.get(Permission, permission_id)
+
+    def get_permission_by_signature(self, resource: str, action: str) -> Permission | None:
+        stmt = (
+            select(Permission)
+            .where(Permission.resource == resource, Permission.action == action)
+            .order_by(Permission.id.asc())
+        )
+        return self.session.execute(stmt).scalars().first()
 
     def assign_role(self, user_id: str, role_id: str) -> None:
         if not self.session.get(UserRole, {"user_id": user_id, "role_id": role_id}):
