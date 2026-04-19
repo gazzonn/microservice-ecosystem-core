@@ -39,9 +39,10 @@ DEMO_HTML = """
     }
 
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background:
         radial-gradient(circle at top left, rgba(180, 83, 9, 0.15), transparent 30%),
         radial-gradient(circle at top right, rgba(15, 118, 110, 0.14), transparent 25%),
@@ -50,55 +51,92 @@ DEMO_HTML = """
     }
 
     .page {
-      width: min(1200px, calc(100% - 32px));
-      margin: 32px auto 48px;
+      width: min(1380px, calc(100% - 28px));
+      margin: 24px auto 36px;
     }
 
     .hero {
       background: linear-gradient(135deg, rgba(180, 83, 9, 0.92), rgba(15, 118, 110, 0.9));
       color: white;
       border-radius: 32px;
-      padding: 28px;
+      padding: 26px 24px;
       box-shadow: var(--shadow);
-      margin-bottom: 24px;
+      margin-bottom: 22px;
+      text-align: center;
     }
 
     .hero h1 {
-      margin: 0 0 8px;
-      font-size: clamp(30px, 4vw, 48px);
+      margin: 0;
+      font-size: clamp(30px, 4vw, 50px);
       line-height: 1.05;
     }
 
-    .hero p {
-      margin: 0;
-      max-width: 760px;
-      color: rgba(255,255,255,0.88);
-      font-size: 18px;
-    }
-
-    .grid {
+    .layout {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: 260px minmax(420px, 1fr) minmax(360px, 430px);
       gap: 18px;
+      align-items: start;
     }
 
-    .card {
+    .panel {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 18px;
       box-shadow: var(--shadow);
     }
 
-    .card h2 {
-      margin: 0 0 6px;
-      font-size: 22px;
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
     }
 
-    .card p {
-      margin: 0 0 14px;
+    .state-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .pill {
+      background: rgba(255,255,255,0.78);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .pill strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
       color: var(--muted);
-      min-height: 40px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .pill span {
+      display: block;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .demo-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .step {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255,255,255,0.62);
+    }
+
+    .step h3 {
+      margin: 0 0 12px;
+      font-size: 22px;
     }
 
     label {
@@ -123,7 +161,7 @@ DEMO_HTML = """
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 12px;
     }
 
     button {
@@ -142,34 +180,9 @@ DEMO_HTML = """
     button.danger { background: var(--danger); }
     button:hover { transform: translateY(-1px); }
 
-    .state {
+    .logs {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin: 18px 0 22px;
-    }
-
-    .pill {
-      background: rgba(255,255,255,0.75);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px 14px;
-      backdrop-filter: blur(6px);
-    }
-
-    .pill strong {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 4px;
-    }
-
-    .console-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 18px;
+      gap: 16px;
     }
 
     pre {
@@ -179,104 +192,90 @@ DEMO_HTML = """
       background: #1f2937;
       color: #f9fafb;
       overflow: auto;
-      min-height: 280px;
+      min-height: 260px;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .full { grid-column: 1 / -1; }
+    @media (max-width: 1160px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="page">
     <section class="hero">
       <h1>Microservice Ecosystem Demo Console</h1>
-      <p>Одна страница для защиты диплома: регистрация, логин, выдача роли, регистрация demo-сервиса и вызовы public/private/admin через gateway с выводом запроса и JSON-ответа.</p>
     </section>
 
-    <section class="state">
-      <div class="pill"><strong>User ID</strong><span id="state-user-id">not set</span></div>
-      <div class="pill"><strong>Role ID</strong><span id="state-role-id">not set</span></div>
-      <div class="pill"><strong>Permission ID</strong><span id="state-permission-id">not set</span></div>
-      <div class="pill"><strong>Access Token</strong><span id="state-token">not set</span></div>
-    </section>
-
-    <section class="grid">
-      <article class="card">
-        <h2>1. Регистрация</h2>
-        <p>Создаёт пользователя через Auth Service.</p>
-        <label>Username<input id="register-username" value="demo_user" /></label>
-        <label>Email<input id="register-email" value="demo_user@example.com" /></label>
-        <label>Password<input id="register-password" type="password" value="StrongPass123!" /></label>
-        <div class="actions">
-          <button onclick="registerUser()">Зарегистрироваться</button>
+    <section class="layout">
+      <aside class="panel">
+        <div class="state-stack">
+          <div class="pill"><strong>User ID</strong><span id="state-user-id">not set</span></div>
+          <div class="pill"><strong>Role ID</strong><span id="state-role-id">not set</span></div>
+          <div class="pill"><strong>Permission ID</strong><span id="state-permission-id">not set</span></div>
+          <div class="pill"><strong>Access Token</strong><span id="state-token">not set</span></div>
         </div>
-      </article>
+      </aside>
 
-      <article class="card">
-        <h2>2. Вход</h2>
-        <p>Получает access и refresh token. Токен сохраняется в состоянии страницы.</p>
-        <label>Username<input id="login-username" value="demo_user" /></label>
-        <label>Password<input id="login-password" type="password" value="StrongPass123!" /></label>
-        <div class="actions">
-          <button class="secondary" onclick="loginUser()">Войти</button>
-        </div>
-      </article>
+      <main class="panel">
+        <div class="demo-stack">
+          <section class="step">
+            <h3>Gateway</h3>
+            <div class="actions">
+              <button onclick="gatewayCall('/demo/public', false)">Public</button>
+              <button class="secondary" onclick="gatewayCall('/demo/private', true)">Private</button>
+              <button class="secondary" onclick="gatewayCall('/demo/admin', true)">Admin</button>
+            </div>
+          </section>
 
-      <article class="card">
-        <h2>3. Роль и Permission</h2>
-        <p>Создаёт роль ADMIN и permission для admin endpoint.</p>
-        <label>Role name<input id="role-name" value="ADMIN" /></label>
-        <label>Permission name<input id="permission-name" value="Read demo admin endpoint" /></label>
-        <div class="actions">
-          <button onclick="createRole()">Создать роль</button>
-          <button class="secondary" onclick="createPermission()">Создать permission</button>
-        </div>
-      </article>
+          <section class="step">
+            <h3>Регистрация</h3>
+            <label>Username<input id="register-username" value="demo_user" /></label>
+            <label>Email<input id="register-email" value="demo_user@example.com" /></label>
+            <label>Password<input id="register-password" type="password" value="StrongPass123!" /></label>
+            <div class="actions">
+              <button onclick="registerUser()">Зарегистрироваться</button>
+            </div>
+          </section>
 
-      <article class="card">
-        <h2>4. Назначение доступа</h2>
-        <p>Назначает роль текущему пользователю и permission текущей роли.</p>
-        <div class="actions">
-          <button onclick="assignRole()">Назначить роль</button>
-          <button class="secondary" onclick="assignPermission()">Назначить permission</button>
-        </div>
-      </article>
+          <section class="step">
+            <h3>Вход</h3>
+            <label>Username<input id="login-username" value="demo_user" /></label>
+            <label>Password<input id="login-password" type="password" value="StrongPass123!" /></label>
+            <div class="actions">
+              <button class="secondary" onclick="loginUser()">Войти</button>
+            </div>
+          </section>
 
-      <article class="card">
-        <h2>5. Service Registry</h2>
-        <p>Регистрирует demo-сервис и его маршруты в Service Registry.</p>
-        <div class="actions">
-          <button onclick="registerDemoService()">Зарегистрировать demo-service</button>
-        </div>
-      </article>
+          <section class="step">
+            <h3>Роль</h3>
+            <label>Role name<input id="role-name" value="ADMIN" /></label>
+            <div class="actions">
+              <button onclick="createRole()">Создать роль</button>
+              <button class="secondary" onclick="assignRole()">Назначить роль</button>
+            </div>
+          </section>
 
-      <article class="card">
-        <h2>6. Gateway</h2>
-        <p>Позитивные и негативные сценарии через API Gateway.</p>
-        <div class="actions">
-          <button onclick="gatewayCall('/demo/public', false)">Public</button>
-          <button class="secondary" onclick="gatewayCall('/demo/private', true)">Private</button>
-          <button class="secondary" onclick="gatewayCall('/demo/admin', true)">Admin</button>
-          <button class="danger" onclick="gatewayCall('/demo/private', false)">Private без токена</button>
-          <button class="danger" onclick="gatewayCall('/demo/admin', false)">Admin без токена</button>
+          <section class="step">
+            <h3>Permission</h3>
+            <label>Permission name<input id="permission-name" value="Read demo admin endpoint" /></label>
+            <div class="actions">
+              <button onclick="createPermission()">Создать permission</button>
+              <button class="secondary" onclick="assignPermission()">Назначить permission</button>
+            </div>
+          </section>
         </div>
-      </article>
+      </main>
 
-      <article class="card full">
-        <h2>Журнал обмена</h2>
-        <p>Слева видно, какой запрос отправлен, справа — какой ответ вернул сервис.</p>
-        <div class="console-grid">
-          <div>
-            <p>Запрос</p>
-            <pre id="request-log">Нажмите любую кнопку, чтобы увидеть отправленный запрос.</pre>
-          </div>
-          <div>
-            <p>Ответ</p>
-            <pre id="response-log">Откройте demo flow кнопками выше.</pre>
-          </div>
+      <aside class="panel">
+        <div class="logs">
+          <pre id="request-log">Нажмите любую кнопку, чтобы увидеть запрос.</pre>
+          <pre id="response-log">Ответ сервиса появится здесь.</pre>
         </div>
-      </article>
+      </aside>
     </section>
   </div>
 
@@ -371,10 +370,6 @@ DEMO_HTML = """
       });
     }
 
-    async function registerDemoService() {
-      await sendRequest("register demo service", "/ui/register-demo-service", {});
-    }
-
     async function gatewayCall(path, withToken) {
       await sendRequest(`gateway ${path}`, "/ui/gateway-request", {
         path,
@@ -430,13 +425,10 @@ async def assign_permission(payload: AssignPermissionPayload) -> JSONResponse:
     return JSONResponse(status_code=result["status_code"], content=result)
 
 
-@router.post("/ui/register-demo-service")
-async def register_demo_service() -> JSONResponse:
-    result = await service.register_demo_service()
-    return JSONResponse(status_code=result["status_code"], content=result)
-
-
 @router.post("/ui/gateway-request")
 async def gateway_request(payload: GatewayRequestPayload) -> JSONResponse:
     result = await service.call_gateway(path=payload.path, token=payload.token)
     return JSONResponse(status_code=result["status_code"], content=result)
+
+
+
